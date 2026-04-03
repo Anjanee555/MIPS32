@@ -1,4 +1,4 @@
-Q.1: Add two numbers stored in registers R1 and R2, and store the result in register R3.
+//Q.1: Add two numbers stored in registers R1 and R2, and store the result in register R3.
 `timescale 1ns/1ps
 
 module mips32_tb;

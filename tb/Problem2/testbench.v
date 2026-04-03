@@ -1,3 +1,5 @@
+//Q.2: LOAD a word stored in memory location 120, add 45 to it, and store the result in memory location 121 .
+
 `timescale 1ns/1ps
 
 module mips32_tb;
