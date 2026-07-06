@@ -16,23 +16,24 @@ module EX_stage(
     output reg [2:0] EX_MEM_Type,
     output reg TAKEN_BRANCH
 
-);
+); 
 
-parameter ADD=6'b000000, 
-          SUB=6'b000001, 
-          AND=6'b000010, 
-          OR=6'b000011,
-          SLT=6'b000100, 
-          MUL=6'b000101,
-          ADDI=6'b001010, 
-          SUBI=6'b001011, 
-          SLTI=6'b001100;
+parameter ADD = 6'b000000, 
+          SUB = 6'b000001, 
+          AND = 6'b000010, 
+          OR  = 6'b000011,
+          SLT = 6'b000100, 
+          MUL = 6'b000101,
+          ADDI= 6'b001010, 
+          SUBI= 6'b001011, 
+          SLTI= 6'b001100;
 
-parameter RR_ALU=3'b000, 
-          RM_ALU=3'b001, 
-          LOAD=3'b010, 
-          STORE=3'b011, 
-          BRANCH=3'b100;
+parameter RR_ALU = 3'b000, 
+          RM_ALU = 3'b001, 
+          LOAD   = 3'b010, 
+          STORE  = 3'b011, 
+          BRANCH = 3'b100;
+          NOP    = 3'b110;
 
 initial begin
     EX_MEM_IR     = 0;
@@ -81,17 +82,21 @@ if(HALTED == 0) begin
 
         BRANCH:
             begin
-                EX_MEM_ALUout <= #2 ID_EX_NPC + ID_EX_Imm;
-                EX_MEM_Cond <= #2 (ID_EX_A == 0);
-                
-                if ((ID_EX_IR[31:26] == 6'b001110 && (ID_EX_A == 0)) ||   // BEQZ
-                    (ID_EX_IR[31:26] == 6'b001101 && (ID_EX_A != 0)))     // BNEQZ
-                    TAKEN_BRANCH <= #2 1;
-                else 
-                    TAKEN_BRANCH <= #2 0;
-
+                EX_MEM_ALUout <= #2 ID_EX_NPC + $signed(ID_EX_Imm);
+                if(ID_EX_IR[31:26] == 6'b001110)begin
+                    EX_MEM_Cond <= #2 (ID_EX_A == 0); 
+                    TAKEN_BRANCH <= #2 (ID_EX_A == 0);
+                end else if(ID_EX_IR[31:26] == 6'b001101)begin
+                    EX_MEM_Cond <= #2 (ID_EX_A != 0);
+                    TAKEN_BRANCH <= #2 (ID_EX_A != 0);
+                end
             end
-
+            
+            NOP:
+                begin
+                    EX_MEM_ALUout <= 0;
+                    EX_MEM_B <= 0;
+                end
     endcase
 end
 

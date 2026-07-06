@@ -35,6 +35,7 @@ IF_stage IF1(
     .IF_ID_IR(IF_ID_IR),
     .IF_ID_NPC(IF_ID_NPC),
     .PC(PC)
+    //.TAKEN_BRANCH(TAKEN_BRANCH)
 );
 
 //ID STAGE 

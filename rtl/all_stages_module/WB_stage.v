@@ -3,7 +3,7 @@
 module WB_stage(
     input clk1,
     input TAKEN_BRANCH,
-    input [2:0] MEM_WB_Type,
+    input [2:0]  MEM_WB_Type,
     input [31:0] MEM_WB_IR,
     input [31:0] MEM_WB_ALUout,
     input [31:0] MEM_WB_LMD,
@@ -11,17 +11,17 @@ module WB_stage(
     output reg [31:0] DATA_OUT,
     output reg HALTED,
     
-    output reg RegWrite,
-    output reg [4:0] WriteReg,
+    output reg        RegWrite,
+    output reg [4:0]  WriteReg,
     output reg [31:0] WriteData
     );
 
-parameter RR_ALU=3'b000, 
-          RM_ALU=3'b001, 
-          LOAD=3'b010, 
-          HALT=3'b101;
+parameter RR_ALU = 3'b000, 
+          RM_ALU = 3'b001, 
+          LOAD   = 3'b010, 
+          HALT   = 3'b101;
 
-initial begin
+initial begin 
     DATA_OUT  = 0;
     HALTED    = 0;
     RegWrite  = 0;
@@ -32,9 +32,6 @@ end
 initial HALTED = 0;
 always @(posedge clk1)begin
         RegWrite <= 0;
-            if(TAKEN_BRANCH == 0) // Disable write if branch taken
-                RegWrite <= 0;
-                
                case(MEM_WB_Type)
                     RR_ALU:begin
                          RegWrite  <= 1;
@@ -56,7 +53,6 @@ always @(posedge clk1)begin
                     end
                     HALT: begin
                       HALTED <= #2 1'b1;
-                      RegWrite <= 0;
                     end
                endcase 
          end  

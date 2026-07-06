@@ -13,18 +13,18 @@ module MEM_stage(
     output reg [31:0] MEM_WB_LMD,
     output reg [2:0] MEM_WB_Type,
     
-    input [31:0] MemReadData,
+    input      [31:0] MemReadData,
     output reg [31:0] MemWriteData,
     output reg [31:0] MemAddress,
-    output reg MemWrite         //memory
+    output reg        MemWrite         //memory
     
 );
 //reg [31:0] mem [0:1023];
 
-parameter RR_ALU=3'b000, 
-          RM_ALU=3'b001, 
-          LOAD=3'b010, 
-          STORE=3'b011;
+parameter RR_ALU = 3'b000, 
+          RM_ALU = 3'b001, 
+          LOAD   = 3'b010, 
+          STORE  = 3'b011;
 
 initial begin
     MEM_WB_IR     = 0;
@@ -52,6 +52,6 @@ always @(posedge clk2)
                 end
         endcase
     
-    end
+    end 
 
 endmodule

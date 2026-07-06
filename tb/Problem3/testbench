@@ -1,6 +1,6 @@
 //Q3: Compute the factorial of a number N stored in memory location 200.The result will be stored in memory location 198.
 
- `timescale 1ns / 1ps
+`timescale 1ns / 1ps
 
  module mips32_tb;
 

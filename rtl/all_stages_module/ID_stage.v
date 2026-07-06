@@ -28,6 +28,7 @@ parameter ADD   = 6'b000000,
           BNEQZ = 6'b001101,
           BEQZ  = 6'b001110,
           HLT   = 6'b111111;
+          NOPI  = 6'b111110;
 
 parameter RR_ALU = 3'b000,
           RM_ALU = 3'b001,
@@ -35,6 +36,7 @@ parameter RR_ALU = 3'b000,
           STORE  = 3'b011,
           BRANCH = 3'b100,
           HALT   = 3'b101;
+          NOP    = 3'b110;
           
  initial begin
     ID_EX_IR   = 0;
@@ -49,6 +51,10 @@ always @(posedge clk2)
 if(HALTED == 0) begin
     if(IF_ID_IR == 32'b0) begin
         ID_EX_IR   <= 0;
+        ID_EX_NPC  <= 0;
+        ID_EX_A    <= 0;
+        ID_EX_B    <= 0;
+        ID_EX_Imm  <= 0;
         ID_EX_Type <= 0;
     end
     
@@ -69,6 +75,7 @@ if(HALTED == 0) begin
         LW: ID_EX_Type <= #2 LOAD;
         SW: ID_EX_Type <= #2 STORE;
         BEQZ,BNEQZ: ID_EX_Type <= #2 BRANCH;
+        NOPI: ID_EX_Type <= #2 NOP;
         HLT: ID_EX_Type <= #2 HALT;
         default: ID_EX_Type <= #2 HALT;
     endcase
