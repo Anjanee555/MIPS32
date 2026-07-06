@@ -1,0 +1,93 @@
+//Q3: Compute the factorial of a number N stored in memory location 200.The result will be stored in memory location 198.
+
+ `timescale 1ns / 1ps
+
+ module mips32_tb;
+
+     reg clk1, clk2;
+     wire [31:0] DATA_OUT;
+     integer i;
+
+mips32_top mips(
+    .clk1(clk1),
+    .clk2(clk2),
+    .DATA_OUT(DATA_OUT)
+);
+     // Two-phase clock generation
+initial begin
+    clk1 = 0;
+    forever #10 clk1 = ~clk1;
+end
+initial begin
+    clk2 = 0;
+    #5 forever #10 clk2 = ~clk2;
+end
+  
+     // Initialize registers and memory
+     initial begin
+         for(i = 0; i < 32; i = i + 1)
+            mips.Reg[i] = i;
+    
+        for(i = 0; i < 1024; i = i + 1)
+            mips.MEM_OUT[i] = 0;
+    
+        #2;
+
+    mips.MEM_OUT[0]  = 32'h280a00c8; // ADDI R10, R0, 200 (Base)
+    mips.MEM_OUT[1]  = 32'h28020001; // ADDI R2, R0, 1 (Result accumulator)
+    mips.MEM_OUT[2]  = 32'hf8000000; // NOP
+    mips.MEM_OUT[3]  = 32'h21430000; // LW R3, 0(R10) (Load N)
+    
+    // Wait for R3 to be written back to Reg File
+    mips.MEM_OUT[4]  = 32'hf8000000; // NOP
+    mips.MEM_OUT[5]  = 32'hf8000000; // NOP
+    mips.MEM_OUT[6]  = 32'hf8000000; // NOP
+
+    // --- LOOP START (Address 6) ---
+    mips.MEM_OUT[7]  = 32'h14431000; // MUL R2, R2, R3
+    mips.MEM_OUT[8]  = 32'hf8000000; // NOP (Wait for R2 to stabilize)
+    mips.MEM_OUT[9]  = 32'hf8000000; // NOP
+    mips.MEM_OUT[10]  = 32'hf8000000; // NOP
+
+    mips.MEM_OUT[11] = 32'h2c630001; // SUBI R3, R3, 1
+    mips.MEM_OUT[12] = 32'hf8000000; // NOP (Wait for R3 to stabilize)
+    mips.MEM_OUT[13] = 32'hf8000000; // NOP
+    mips.MEM_OUT[14] = 32'hf8000000; // NOP
+    mips.MEM_OUT[15] = 32'hf8000000; //  NOP 
+
+    // BNEQZ R3 to Address 7. 
+    // Current instruction is at 16, so NPC is 17. 
+    // Target is 7. We need 17 + (-10) = 7.
+    // Offset -10 = 0xFFF6
+    mips.MEM_OUT[16] = 32'h3460fff6; 
+    
+    mips.MEM_OUT[17] = 32'hf8000000; // Branch Delay Slot
+    mips.MEM_OUT[18] = 32'hf8000000; // Branch Delay Slot
+    mips.MEM_OUT[19] = 32'h2542fffe; // SW R2, -2(R10) -> Writes to 198
+    mips.MEM_OUT[20] = 32'hfc000000; // HL
+
+       mips.MEM_OUT[200] = 10;
+         #70000;
+     end
+
+     // Waveform
+     initial begin
+        $dumpfile("mips32.vcd");
+        $dumpvars(0, mips32_tb);   
+        #65000;
+    
+        $display("mem[200]: %2d", mips.MEM_OUT[200]);
+        $display("mem[198]: %6d", mips.MEM_OUT[198]);
+    
+        $finish;
+end
+
+    always @(posedge clk1) begin
+        // Check if the instruction currently in the EX stage is BNEQZ (Opcode 6'b001101)
+        if (mips.EX1.ID_EX_IR[31:26] == 6'b001101) begin
+            $display("Time = %0t ns | Loop Counter (R3) = %d | Accumulated Value (R2) = %d", 
+                     $time, mips.Reg[3], mips.Reg[2]);
+        end
+    end
+
+ endmodule
